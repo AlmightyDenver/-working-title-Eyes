@@ -9,61 +9,26 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
 
+
 namespace WindowsFormsApp1_My_Precious_Eyes
 {
     public partial class Form1 : Form
     {
+        private int total_seconds;
+        private int rmn_seconds;
+        private SoundPlayer _soundPlayer;
+        int interval;
         public Form1()
         {
             InitializeComponent();
-            ////// ////////////////음악 추가하기//////////// ////////////////
+            //음악 추가하기
             _soundPlayer = new SoundPlayer("파일명");
         }
-        int interval;
 
-        
-        private void alarm(int interval)
+       //창 맨 위로, 소리, 사진 추가하기
+        private void alarm()
         {
-            timer1.Start();
-            //timer1.Interval = interval * 60 * 1000;
-            timer1.Interval = 10000;
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            textBox1.Text = comboBox1.SelectedItem.ToString() + "분 마다 알람이 울립니다.";
-            interval = Convert.ToInt32(comboBox1.SelectedItem);
-            alarm(interval);
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            string[] combo_Lists = { "30", "45", "50", "60", "90", "else" };
-            comboBox1.Items.AddRange(combo_Lists);
-            comboBox1.SelectedIndex = 3; //set default
-
-        }
-        private SoundPlayer _soundPlayer;
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            circularProgressBar1.Increment(100/interval);
-            circularProgressBar1.PerformStep();
-
-
-            Random rnd = new Random();
-            int val = rnd.Next(1, 9);
             this.TopMost = true;
-            _soundPlayer.Play();
-            /// ///////////////재생 시간 delay//////// ////////////////
-      
-            _soundPlayer.Stop();
-
-
-            string Path = @"c:\Users\the_Almighty_Denver\Desktop\img_folder\";
-            string FileName = val.ToString() + ".jpg";
-            pictureBox1.Image = System.Drawing.Image.FromFile(Path + FileName);
-            
 
 
         }
@@ -71,50 +36,141 @@ namespace WindowsFormsApp1_My_Precious_Eyes
 
 
 
+        /// Set Ringtone
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
 
+        }
 
-        /// /////////////////// 무음 모드/////////////////// ////////////////
+        /// Test Ringtone
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
+        /// Stop Playing
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        /// 무음 모드
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
         }
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            if (checkBox1.Checked == true)//체크가 된 상태
-            {
-                this.TopMost = true;
-            }
-            if (checkBox1.Checked == false)//체크를 해제한 상태
-            {
-                this.TopMost = false;
-            }
-        }
 
-        /// /////////progressbar 정지, 재시작 기능 넣기 /////////////////// ////////////
-        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+
+
+
+
+
+
+
+
+
+
+        private void Form1_Load(object sender, EventArgs e)
         {
-            if (checkBox3.Checked)
+            string[] combo_Lists = {"1", "30", "45", "50", "60", "90"};
+            comboBox1.Items.AddRange(combo_Lists);
+            comboBox1.SelectedIndex = 0; //set default
+
+
+            string[] ringtone_Lists = { "Analog Watch Alarm Sound", "Baby Music Box Sound", "Cartoon Birds 2 Sound", "Hello Baby Girl Sound", "Santa Clause Jolly Laugh Sound", "Service Bell Help Sound", "Sunny Day Sound", "Ticking Clock Sound"};
+            comboBox2.Items.AddRange(ringtone_Lists);
+            comboBox2.SelectedIndex = 0;
+
+            circularProgressBar1.Value = 0;
+            circularProgressBar1.Minimum = 0;
+            circularProgressBar1.Maximum = 100;
+
+        }
+        
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (rmn_seconds > 0)
             {
-                checkBox3.Text = "재시작";
-                
+                rmn_seconds--;
+                //progressbar
+                double pgbar = 0;
+                pgbar = (double)(total_seconds - rmn_seconds) / total_seconds * 100;
+                circularProgressBar1.Value = (int)pgbar;
+
+                //write remaining time on Label
+                int minutes = rmn_seconds / 60;
+                int seconds = rmn_seconds - minutes * 60;
+                if (minutes < 10 && seconds >= 10) this.label1.Text = "0" + minutes.ToString() + ":"+ seconds.ToString();
+                else if(minutes>=10 && seconds < 10) this.label1.Text =  minutes.ToString() + ":0" + seconds.ToString();
+                else this.label1.Text = minutes.ToString() + ":" + seconds.ToString();
 
             }
             else
             {
-                checkBox3.Text = "일시 정지";
+                //timer 시간
+                this.timer1.Stop();
+                alarm();
+            }
+  
+        }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //************************    완    ************************ 
+        /// start button
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int minutes = int.Parse(this.comboBox1.SelectedItem.ToString());
+            total_seconds = (minutes * 60);
+            rmn_seconds = total_seconds;
+            this.timer1.Enabled = true;
+
+            textBox1.Text = comboBox1.SelectedItem.ToString() + "분 마다 알람이 울립니다.";
+            interval = Convert.ToInt32(comboBox1.SelectedItem);
+
+        }
+        /// TopMost
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox2.Checked)
+            {
+                this.TopMost = true;
+            }
+            else
+            {
+                this.TopMost = false;
+
+            }
+
+        }
+        /// pause
+        private void checkBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox3.Checked)
+            {
+                checkBox3.Text = "일시정지";
+                this.timer1.Enabled = true;
+            }
+            else
+            {
+                checkBox3.Text = "재시작";
+                this.timer1.Enabled = false;
             }
         }
 
-        //사진 클릭하면 다른 사진으로 바뀜
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            Random rnd = new Random();
-            int val = rnd.Next(1, 9);
-            string Path = @"c:\Users\the_Almighty_Denver\Desktop\img_folder\";
-            string FileName = val.ToString() + ".jpg";
-            pictureBox1.Image = System.Drawing.Image.FromFile(Path + FileName);
-        }
 
 
 
@@ -124,8 +180,7 @@ namespace WindowsFormsApp1_My_Precious_Eyes
 
 
 
-
-
+        //************************    empty    ************************ 
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -134,14 +189,9 @@ namespace WindowsFormsApp1_My_Precious_Eyes
         {
 
         }
-        private void button2_Click(object sender, EventArgs e)
-        {
 
-        }
-        private void circularProgressBar1_Click(object sender, EventArgs e)
-        {
 
-        }
+
 
     }
 }
